@@ -1,0 +1,100 @@
+{% extends "emotion_app/base.html" %}
+
+{% block content %}
+
+<style>
+.dashboard{
+max-width:800px;
+margin:60px auto;
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:25px;
+}
+
+.card{
+background:rgba(255,255,255,0.06);
+padding:30px;
+border-radius:15px;
+text-align:center;
+backdrop-filter:blur(10px);
+}
+
+.card h2{
+font-size:34px;
+margin-top:10px;
+}
+
+.feedback-section{
+max-width:800px;
+margin:40px auto;
+}
+
+.feedback-card{
+background:rgba(255,255,255,0.05);
+padding:15px;
+border-radius:10px;
+margin-bottom:15px;
+}
+</style>
+
+<h1 style="text-align:center">AI System Dashboard</h1>
+
+<div class="dashboard">
+
+<div class="card">
+<p>Total Predictions</p>
+<h2>{{ total_predictions }}</h2>
+</div>
+
+<div class="card">
+<p>Average Rating</p>
+<h2>{{ avg_rating|default:"0" }} ⭐</h2>
+</div>
+
+<div class="card">
+<p>User Accuracy</p>
+<h2>{{ accuracy_percent }}%</h2>
+</div>
+
+</div>
+
+
+<!-- Recent Feedback Section -->
+
+<div class="feedback-section">
+
+<h2 style="text-align:center;">Recent User Feedback</h2>
+
+{% if recent_feedback %}
+
+{% for fb in recent_feedback %}
+
+<div class="feedback-card">
+
+<p><strong>Rating:</strong> {{ fb.rating }} ⭐</p>
+
+<p><strong>Accurate:</strong> 
+{% if fb.is_accurate %}
+Yes
+{% else %}
+No
+{% endif %}
+</p>
+
+{% if fb.comment %}
+<p><strong>Comment:</strong> {{ fb.comment }}</p>
+{% endif %}
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p style="text-align:center;">No feedback submitted yet.</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

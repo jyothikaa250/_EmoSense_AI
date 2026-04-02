@@ -1,0 +1,92 @@
+{% extends "emotion_app/base.html" %}
+
+{% block content %}
+
+<style>
+
+.about-container{
+max-width:800px;
+margin:60px auto;
+padding:40px;
+border-radius:20px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(10px);
+box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+
+.about-container h1{
+text-align:center;
+margin-bottom:20px;
+}
+
+.about-container p{
+line-height:1.7;
+margin-bottom:15px;
+}
+
+.feature-list{
+margin-top:20px;
+}
+
+.feature-list li{
+margin-bottom:10px;
+}
+
+.highlight{
+color:#00f5a0;
+font-weight:600;
+}
+
+</style>
+
+
+<div class="about-container">
+
+<h1>About EmoSense AI</h1>
+
+<p>
+<span class="highlight">EmoSense AI</span> is an intelligent machine learning based web application designed to detect human emotions from speech signals. 
+It enables computers to understand human feelings by analyzing voice input in real-time.
+</p>
+
+<p>
+The system allows users to upload audio or record voice directly through the browser. 
+The input audio is processed using advanced audio signal processing techniques, and important features such as MFCC, spectral features, and energy levels are extracted for analysis.
+</p>
+
+<p>
+To improve reliability, the system includes validation mechanisms such as <span class="highlight">silence detection</span> and <span class="highlight">music filtering</span>, ensuring that only valid human speech is used for emotion prediction.
+</p>
+
+<h3>Key Features</h3>
+
+<ul class="feature-list">
+<li>🎤 Voice Recording for real-time emotion analysis</li>
+<li>📁 Audio Upload for emotion prediction</li>
+<li>🧠 Machine Learning based emotion classification (SVM)</li>
+<li>🎵 Music Detection to filter non-speech input</li>
+<li>🔇 Silence Detection for invalid audio handling</li>
+<li>📊 Top-3 Emotion Prediction with confidence score</li>
+<li>⭐ User Feedback System for model evaluation</li>
+<li>📈 Admin Dashboard for monitoring predictions</li>
+</ul>
+
+<h3>Technology Stack</h3>
+
+<p>
+Python, Django, Machine Learning (Scikit-learn), Librosa for audio processing, and HTML, CSS, JavaScript for frontend development.
+</p>
+
+<h3>System Workflow</h3>
+
+<p>
+Audio Input → Preprocessing → Validation (Silence & Music Detection) → Feature Extraction → Emotion Prediction → Result Display & Storage → Feedback Collection
+</p>
+
+<p style="margin-top:30px;text-align:center;">
+Developed by <strong>Jyothika</strong> 💙
+</p>
+
+</div>
+
+{% endblock %}

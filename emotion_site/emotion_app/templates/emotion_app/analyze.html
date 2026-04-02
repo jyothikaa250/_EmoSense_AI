@@ -1,0 +1,309 @@
+{% extends "emotion_app/base.html" %}
+
+{% block content %}
+
+<style>
+.analyze-container {
+    max-width: 520px;
+    margin: 60px auto;
+    padding: 40px;
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    background: rgba(255,255,255,0.05);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+
+.analyze-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+input[type="file"] {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    color: #cbd5e1;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.primary-btn {
+    background: linear-gradient(to right, #00f5a0, #00d9f5);
+    color: black;
+}
+
+.primary-btn:hover {
+    transform: scale(1.03);
+}
+
+.secondary-btn {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.secondary-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.danger-btn {
+    background: #ff4d4d;
+    color: white;
+}
+
+.result-box {
+    margin-top: 30px;
+}
+
+.emotion-main {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.confidence-bar {
+    margin-top: 12px;
+    height: 10px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(to right, #00f5a0, #00d9f5);
+    width: {{ confidence|default:0 }}%;
+    transition: width 0.8s ease;
+}
+
+.top-card {
+    background: rgba(255,255,255,0.07);
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.warning {
+    color: #ffcc00;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+</style>
+
+<div class="analyze-container">
+
+    <h2>Analyze Voice Emotion</h2>
+
+    <!-- AI Assistant -->
+    <div id="aiAssistant" style="
+    background: rgba(0, 245, 160, 0.1);
+    border-left: 4px solid #00f5a0;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    ">
+    🤖 <strong>AI Assistant:</strong> Upload or record a short speech sample to analyze emotion.
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label>Upload Audio (WAV recommended)</label>
+        <input type="file" id="audioInput" name="audio_file" accept="audio/*">
+
+        <hr style="opacity:0.2; margin:20px 0;">
+
+        <label>Or Record Voice</label>
+
+        <button type="button" class="secondary-btn" onclick="startRecording()">Start Recording</button>
+        <button type="button" class="danger-btn" onclick="stopRecording()">Stop Recording</button>
+
+        <p id="recordingStatus"></p>
+
+        <audio id="audioPlayback" controls style="display:none; width:100%; margin-top:10px;"></audio>
+
+        <button type="submit" class="primary-btn">Analyze Emotion</button>
+        <button type="button" class="secondary-btn" onclick="clearForm()">Clear</button>
+    </form>
+
+    {% if emotion %}
+    <div class="result-box">
+
+        {% if confidence and confidence >= 30 and confidence < 50 %}
+        <div class="warning">⚠ Low Confidence Prediction</div>
+        {% endif %}
+
+        <div class="emotion-main">
+            {{ emotion|title }} ({{ confidence }}%)
+        </div>
+
+        <div class="confidence-bar">
+            <div class="confidence-fill"></div>
+        </div>
+
+        {% if top3 %}
+        <div style="margin-top:20px;">
+            <h4>Top Predictions</h4>
+            {% for item in top3 %}
+            <div class="top-card">
+                <span>{{ item.emotion|title }}</span>
+                <span>{{ item.confidence }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <hr style="margin:30px 0; opacity:0.2;">
+
+        <h3>Rate this Prediction</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <label>⭐ Rating</label>
+            <select name="rating" required>
+                <option value="">Select</option>
+                <option value="1">1 ⭐</option>
+                <option value="2">2 ⭐⭐</option>
+                <option value="3">3 ⭐⭐⭐</option>
+                <option value="4">4 ⭐⭐⭐⭐</option>
+                <option value="5">5 ⭐⭐⭐⭐⭐</option>
+            </select>
+
+            <br><br>
+
+            <label>Was the prediction accurate?</label>
+            <select name="is_accurate" required>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+            </select>
+
+            <br><br>
+
+            <label>Comment (optional)</label>
+            <textarea name="comment" rows="3"></textarea>
+
+            <br><br>
+
+            <button type="submit" class="primary-btn">Submit Feedback</button>
+        </form>
+
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+
+function updateAssistantMessage(message) {
+
+    let box = document.getElementById("aiAssistant");
+
+    box.innerHTML = "🤖 <strong>AI Assistant:</strong> " + message;
+
+    // Default
+    box.style.background = "rgba(0, 245, 160, 0.1)";
+    box.style.borderLeft = "4px solid #00f5a0";
+
+    // Error (music / silence)
+    if (message.toLowerCase().includes("music") || 
+        message.toLowerCase().includes("no speech")) {
+
+        box.style.background = "rgba(255, 77, 77, 0.15)";
+        box.style.borderLeft = "4px solid #ff4d4d";
+    }
+
+    // Warning
+    if (message.toLowerCase().includes("confidence")) {
+
+        box.style.background = "rgba(255, 204, 0, 0.15)";
+        box.style.borderLeft = "4px solid #ffcc00";
+    }
+}
+
+// 🔥 FIX: runs after page loads
+document.addEventListener("DOMContentLoaded", function() {
+
+    let error = "{{ error_message|default:'' }}";
+
+    if (error) {
+        updateAssistantMessage(error);
+    }
+
+});
+
+let mediaRecorder;
+let audioChunks = [];
+
+function startRecording() {
+    updateAssistantMessage("Recording started... please speak clearly.");
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            mediaRecorder.start();
+            document.getElementById("recordingStatus").innerText = "Recording...";
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        });
+}
+
+function stopRecording() {
+    updateAssistantMessage("Recording complete. Click analyze to detect emotion.");
+
+    if (!mediaRecorder) return;
+
+    mediaRecorder.stop();
+
+    mediaRecorder.onstop = () => {
+        document.getElementById("recordingStatus").innerText = "Recording complete.";
+
+        const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+        const audioFile = new File([audioBlob], "recorded.webm");
+
+        const dt = new DataTransfer();
+        dt.items.add(audioFile);
+
+        document.getElementById("audioInput").files = dt.files;
+
+        let url = URL.createObjectURL(audioBlob);
+        let player = document.getElementById("audioPlayback");
+        player.src = url;
+        player.style.display = "block";
+    };
+}
+
+function clearForm() {
+    updateAssistantMessage("Upload or record a speech sample to analyze emotion.");
+
+    document.getElementById("audioInput").value = "";
+    document.getElementById("recordingStatus").innerText = "";
+
+    let player = document.getElementById("audioPlayback");
+    player.style.display = "none";
+
+    audioChunks = [];
+    mediaRecorder = null;
+
+    const resultBox = document.querySelector(".result-box");
+    if (resultBox) resultBox.remove();
+}
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "emotion_app/base.html" %}
+
+{% block content %}
+
+<style>
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.hero h1 {
+    font-size: 56px;
+    font-weight: 700;
+    background: linear-gradient(to right, #00f5a0, #00d9f5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+    margin-top: 20px;
+    font-size: 20px;
+    opacity: 0.8;
+}
+
+.hero button {
+    margin-top: 40px;
+    padding: 15px 35px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    background: linear-gradient(to right, #00f5a0, #00d9f5);
+    color: black;
+    transition: 0.3s;
+}
+
+.hero button:hover {
+    transform: scale(1.05);
+}
+</style>
+
+<div class="hero">
+    <h1>Understand Emotions Through Voice</h1>
+    <p>
+        AI-powered speech emotion detection using Machine Learning.
+        Analyze human emotions from voice recordings instantly.
+    </p>
+
+    <button onclick="window.location.href='/analyze/'">
+        Try Emotion Analyzer
+    </button>
+</div>
+
+{% endblock %}
