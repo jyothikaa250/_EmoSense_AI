@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+
+# VS Code
+.vscode/
+
+# Dataset & Audio files
+dataset/
+uploads/
+*.wav
+*.ogg
+
+# Django
+db.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
